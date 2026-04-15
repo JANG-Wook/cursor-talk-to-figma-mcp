@@ -2358,6 +2358,35 @@ function sendCommandToFigma(command, params = {}, timeoutMs = 3e4) {
   });
 }
 server.tool(
+  "execute_code",
+  "Execute arbitrary JavaScript code in the Figma plugin context",
+  {
+    code: import_zod.z.string().describe("JavaScript code to execute in Figma plugin context")
+  },
+  async ({ code }) => {
+    try {
+      const result = await sendCommandToFigma("execute_code", { code });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result)
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error executing code: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+server.tool(
   "join_channel",
   "Join a specific channel to communicate with Figma",
   {

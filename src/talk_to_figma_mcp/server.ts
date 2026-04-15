@@ -2652,7 +2652,8 @@ type FigmaCommand =
   | "set_default_connector"
   | "create_connections"
   | "set_focus"
-  | "set_selections";
+  | "set_selections"
+  | "execute_code";
 
 type CommandParams = {
   get_document_info: Record<string, never>;
@@ -3032,6 +3033,37 @@ function sendCommandToFigma(
     ws.send(JSON.stringify(request));
   });
 }
+
+// Execute arbitrary JavaScript code in the Figma plugin context
+server.tool(
+  "execute_code",
+  "Execute arbitrary JavaScript code in the Figma plugin context",
+  {
+    code: z.string().describe("JavaScript code to execute in Figma plugin context"),
+  },
+  async ({ code }: any) => {
+    try {
+      const result = await sendCommandToFigma("execute_code", { code });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error executing code: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+      };
+    }
+  }
+);
 
 // Update the join_channel tool
 server.tool(

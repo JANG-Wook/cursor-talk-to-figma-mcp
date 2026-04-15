@@ -159,6 +159,8 @@ async function handleCommand(command, params) {
       return await setTextContent(params);
     case "clone_node":
       return await cloneNode(params);
+    case "execute_code":
+      return await executeCode(params);
     case "scan_text_nodes":
       return await scanTextNodes(params);
     case "set_multiple_text_contents":
@@ -4101,4 +4103,12 @@ async function setSelections(params) {
     notFoundIds: notFoundIds,
     message: `Selected ${nodes.length} nodes${notFoundIds.length > 0 ? ` (${notFoundIds.length} not found)` : ''}`
   };
+}
+
+async function executeCode(params) {
+  const { code } = params || {};
+  if (!code) throw new Error("Missing code parameter");
+  const fn = new Function('figma', `return (async () => { ${code} })()`);
+  const result = await fn(figma);
+  return result;
 }
